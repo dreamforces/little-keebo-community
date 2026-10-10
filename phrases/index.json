@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "packages": [
+    {
+      "id": "example.cooking",
+      "name": "Cooking",
+      "description": "Kitchen terms for recipes and menus. A sample phrasebook to copy.",
+      "author": "Little Keebo",
+      "version": "1.0.0",
+      "path": "phrases/cooking.json",
+      "sha256": "7efcf4a7639584623d554678f5e7bfd69f6161a13a31936def98a56461b06ba0",
+      "capabilities": [
+        "12 terms"
+      ],
+      "tags": [
+        "sample"
+      ]
+    }
+  ]
+}

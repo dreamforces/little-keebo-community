@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "packages": [
+    {
+      "id": "example.thank-you",
+      "name": "Thank-you notes",
+      "description": "Three short thank-you notes with blanks to fill in. A sample template pack to copy.",
+      "author": "Little Keebo",
+      "version": "1.0.0",
+      "path": "templates/thank-you.json",
+      "sha256": "134634f056c1d52030df58acff9ced0f20d83bc597c31ea28ab2cad2476e3e18",
+      "capabilities": [
+        "3 templates",
+        "1 category"
+      ],
+      "tags": [
+        "sample"
+      ]
+    }
+  ]
+}

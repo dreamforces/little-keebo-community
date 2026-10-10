@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 3,
+  "id": "example.cooking",
+  "name": "Cooking",
+  "version": "1.0.0",
+  "author": "Little Keebo",
+  "description": "Kitchen terms for recipes and menus. A sample phrasebook to copy.",
+  "tags": [
+    "sample"
+  ],
+  "domain": "Home cooking",
+  "terms": [
+    "mise en place",
+    "al dente",
+    "sauté",
+    "simmer gently",
+    "fold in",
+    "preheat the oven",
+    "deglaze the pan",
+    "reduce by half",
+    "rest the dough",
+    "season to taste",
+    "blanch",
+    "zest of a lemon"
+  ]
+}

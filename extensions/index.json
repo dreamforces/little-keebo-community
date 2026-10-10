@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "packages": [
+    {
+      "id": "example.wordcount",
+      "name": "Word Count",
+      "description": "Type /wc, then Tab, for the number of words in the line. /wc sentences counts sentences.",
+      "author": "Little Keebo",
+      "version": "1.0.0",
+      "path": "extensions/wordcount.js",
+      "sha256": "d3fcb086167fe188df6079c64499f43e07baabf3a9177dad64804b14ddb7c15c",
+      "capabilities": [
+        "1 command"
+      ],
+      "tags": [
+        "commands"
+      ],
+      "icon": "text.alignleft"
+    }
+  ]
+}
