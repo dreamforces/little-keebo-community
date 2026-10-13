@@ -4,7 +4,7 @@ Extensions, phrasebooks and templates for Little Keebo, written by the people wh
 
 - **Extensions** are one JavaScript file each: `/commands`, abbreviations, `//note` compose, spelling and grammar marks, and ⌃⌘/ actions.
 - **Phrasebooks** give the writing model a field and its terms, so suggestions use that field's words.
-- **Templates** are text with blanks to fill in, typed by entering `/~` and a trigger.
+- **Templates** are text with blanks to fill in, typed after `;` and a trigger.
 
 ```
 extensions/*.js         extensions, one JavaScript file each
@@ -13,11 +13,14 @@ phrases/*.json          phrasebooks (schema 3)
 phrases/index.json      generated
 templates/*.json        template packs (schema 1)
 templates/index.json    generated
-scripts/                index builder
+scripts/                index builder, and the publisher the workflow runs
 EXTENSIONS.md           the guide: the file format and every function a script can call
 ```
 
-The app checks each download against the SHA-256 in the shelf's `index.json`. Extensions run in a sandbox with no files or keys, and a script uses the network only after the writer allows that one.
+Merging to `main` publishes the library to `downloads.littlekeebo.app` (`.github/workflows/publish.yml`): each new package
+version goes up once under `extensions/community/<shelf>/<id>/<version>/`, and each shelf's index is signed with the
+community library's key and written to `feeds/community/<shelf>/index.json`. The app checks that signature before it trusts
+an index, then checks each download against the SHA-256 the index lists. Extensions run in a sandbox with no files or keys, and a script uses the network only after the writer allows that one.
 
 ## Writing your own
 
@@ -26,4 +29,5 @@ The app checks each download against the SHA-256 in the shelf's `index.json`. Ex
    - [`phrases/cooking.json`](phrases/cooking.json)
    - [`templates/thank-you.json`](templates/thank-you.json)
 2. Put your file on its shelf and run `python3 scripts/build-extension-index.py` at the root.
-3. Commit the file with the shelf's `index.json` and open a pull request.
+3. Commit the file with the shelf's `index.json` and open a pull request. A version is published once: to change a package
+   once it is out, bump its `version`.
