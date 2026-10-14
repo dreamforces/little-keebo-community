@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Publishes a library's shelves to Little Keebo's downloads host.
 
-Kept identical to library/scripts/publish.py in dreamforces/little-keebo, which the app's own library publishes with.
+The same file is library/scripts/publish.py in dreamforces/little-keebo and scripts/publish.py in
+dreamforces/little-keebo-community; the library's check fails when the two differ.
 
     publish.py --source library --account <storage account> --key-id <Key Vault key id>
     publish.py --source library --out <folder> --sign-pem <private key.pem>      (a dry run, signed with a local key)
