@@ -1,10 +1,10 @@
 name: Publish
 
-# On a pull request: the indexes must be what scripts/build-extension-index.py makes of the packages. On main: the library goes
-# to downloads.littlekeebo.app. scripts/publish.py uploads each new package version once under extensions/community/ and writes
-# each shelf's index, signed with the shelf-community key, to feeds/community/. It runs in the publish environment (main only)
-# as the community identity, which may write only under community/. Until the environment has its variables, publishing is
-# skipped.
+# On a pull request: the indexes must be what scripts/build-extension-index.py makes of the packages, and every template pack
+# must match the schema the app reads (https://littlekeebo.app/schema/template-pack.schema.json). On main: the same check, then
+# the library goes to downloads.littlekeebo.app. scripts/publish.py uploads each new package version once under
+# extensions/community/ and writes each shelf's index, signed with the shelf-community key, to feeds/community/. It runs in the
+# publish environment (main only) as the community identity, which may write only under community/.
 
 on:
   pull_request:
@@ -26,6 +26,12 @@ jobs:
           python3 scripts/build-extension-index.py > /dev/null
           git diff --exit-code -- extensions/index.json phrases/index.json templates/index.json \
             || { echo "::error::An index is out of date: run python3 scripts/build-extension-index.py and commit it."; exit 1; }
+      - name: The template packs match the schema
+        run: |
+          python3 -m venv "${RUNNER_TEMP}/venv"
+          "${RUNNER_TEMP}/venv/bin/pip" install --quiet "jsonschema==4.26.0"
+          curl --fail --silent --show-error -o "${RUNNER_TEMP}/template-pack.schema.json" https://littlekeebo.app/schema/template-pack.schema.json
+          "${RUNNER_TEMP}/venv/bin/python" scripts/check-templates.py "${RUNNER_TEMP}/template-pack.schema.json" templates/*.json
 
   publish:
     name: publish
@@ -40,27 +46,14 @@ jobs:
       contents: read
       id-token: write
     env:
-      AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
       DOWNLOADS_STORAGE_ACCOUNT: ${{ vars.DOWNLOADS_STORAGE_ACCOUNT }}
       SHELF_SIGNING_KEY_ID: ${{ vars.SHELF_SIGNING_KEY_ID }}
     steps:
-      - name: Check the publish environment
-        id: ready
-        run: |
-          if [ -z "${AZURE_CLIENT_ID}" ] || [ -z "${DOWNLOADS_STORAGE_ACCOUNT}" ] || [ -z "${SHELF_SIGNING_KEY_ID}" ]; then
-            echo "::notice::Publishing skipped. The publish environment has no AZURE_CLIENT_ID, DOWNLOADS_STORAGE_ACCOUNT or SHELF_SIGNING_KEY_ID yet."
-            echo "ready=false" >> "${GITHUB_OUTPUT}"
-          else
-            echo "ready=true" >> "${GITHUB_OUTPUT}"
-          fi
-      - if: steps.ready.outputs.ready == 'true'
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - if: steps.ready.outputs.ready == 'true'
-        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
         with:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
       - name: Publish the community library
-        if: steps.ready.outputs.ready == 'true'
         run: python3 scripts/publish.py --source community --account "${DOWNLOADS_STORAGE_ACCOUNT}" --key-id "${SHELF_SIGNING_KEY_ID}"
