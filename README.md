@@ -4,16 +4,16 @@ Extensions, phrasebooks and templates for Little Keebo, written by the people wh
 
 - **Extensions** are one JavaScript file each: `/commands`, abbreviations, `//note` compose, spelling and grammar marks, and ⌃⌘/ actions.
 - **Phrasebooks** give the writing model a field and its terms, so suggestions use that field's words.
-- **Templates** are text with blanks to fill in, typed after `;` and a trigger.
+- **Templates** are text with blanks to fill in: type `;` and a template's trigger, then Tab.
 
 ```
 extensions/*.js         extensions, one JavaScript file each
 extensions/index.json   generated
 phrases/*.json          phrasebooks (schema 3)
 phrases/index.json      generated
-templates/*.json        template packs (schema 1)
+templates/*.json        template packs (schema 2)
 templates/index.json    generated
-scripts/                index builder, and the publisher the workflow runs
+scripts/                index builder, template pack check, and the publisher the workflow runs
 EXTENSIONS.md           the guide: the file format and every function a script can call
 ```
 

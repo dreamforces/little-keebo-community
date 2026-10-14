@@ -279,7 +279,7 @@ The name follows the same rules as a command key. These commands have no options
 
 ## Abbreviations
 
-`expansionsFrom` names a `list` setting with `trigger` and `text` columns. The writer types `/~` and a trigger (`/~brb`), then Tab, and the trigger is replaced. A plain word never expands. A trigger is 1–40 characters with no space. The replacement is 1–500 characters.
+`expansionsFrom` names a `list` setting with `trigger` and `text` columns. The writer types `;` and a trigger (`;brb`), then Tab, and the trigger is replaced (the writer can choose `;;` or `,,` instead of `;`). A plain word never expands. A trigger is 1–40 characters with no space. The replacement is 1–500 characters.
 
 ```js
 settings: [
@@ -296,7 +296,7 @@ settings: [
 expansionsFrom: "abbreviations"
 ```
 
-`typedExpansions: true` expands the trigger as it is typed, such as `+1` or `<3`, and those rows are not listed after `/~`. `{skin}` in the replacement becomes the skin-tone modifier from a `choice` setting whose id is `skin`, when that choice is an emoji of the tone. It becomes nothing when the emoji has no tone.
+`typedExpansions: true` expands the trigger as it is typed, such as `+1` or `<3`, and those rows are not listed after `;`. `{skin}` in the replacement becomes the skin-tone modifier from a `choice` setting whose id is `skin`, when that choice is an emoji of the tone. It becomes nothing when the emoji has no tone.
 
 ```js
 settings: [
@@ -788,11 +788,11 @@ A phrasebook is JSON. It tells the writing model the field and the terms to pref
 
 ## Templates
 
-A template pack is JSON. Each template is text the writer types by entering `/~` and its trigger, then Tab. A pack does not run code, and installing one does not ask for permission.
+A template pack is JSON. The writer types `;` and a template's trigger, then Tab (or `;;` or `,,`, if they chose one instead of `;`). A pack does not run code, and installing one does not ask for permission.
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "you.thanks",
   "name": "Thank-you notes",
   "version": "1.0.0",
@@ -801,18 +801,24 @@ A template pack is JSON. Each template is text the writer types by entering `/~`
   "categories": ["Thanks"],
   "templates": [
     {
+      "id": "9b2f4c1e-7d3a-4e8b-a1c5-6f0e2d9b8a71",
       "trigger": "thanks",
       "title": "Thank you",
       "text": "Hi ${1:name},\n\nThank you for ${2:your help}.\n\n$0",
-      "category": "Thanks"
+      "category": "Thanks",
+      "blanks": { "1": { "hint": "their first name" } }
     }
   ]
 }
 ```
 
-A pack holds 1–300 templates. A `trigger` is lowercase letters, digits and hyphens, 1–40 characters, and is used once in the pack. A `title` is optional, up to 60 characters. The `text` is 1–4,000 characters. A `category` is optional; a pack has up to 40 categories, each up to 40 characters.
+Every template has an `id`: a lowercase UUID that stays the same whatever else about the template changes, since usage, remembered values and updates follow it. Make one with `uuidgen | tr '[:upper:]' '[:lower:]'`, and never reuse one.
 
-In `text`, `${1:name}` is a blank that starts with the words after the colon, `${2|one,two|}` is a choice where the first is the default, and `$0` is where the caret ends. Write `\$`, `\}`, `\|`, `\,` and `\\` for those characters themselves.
+A pack holds 1–300 templates. A `trigger` is lowercase letters, digits and hyphens, 1–40 characters, and is used once in the pack. A `title` is optional, up to 60 characters. The `text` is 1–4,000 characters. A `category` is optional; a pack has up to 40 categories, each up to 40 characters. Bump `version` on every change: a published version never changes.
+
+In `text`, `${1:name}` is a blank that starts with the words after the colon, `${2|one,two|}` is a choice where the first is the default, and `$0` is where the caret ends. Write `\$`, `\}`, `\|`, `\,` and `\\` for those characters themselves. `blanks` describes a blank by its number: a `hint` (what it holds, which the card shows and the model reads), a `type` (`text`, `paragraph`, `choice`, `many`, `date`, `number` or `optional`), and `remember: false` for one whose words should not be offered again.
+
+[The schema](https://littlekeebo.app/schema/template-pack.schema.json) lists every field, and anything it does not list is refused. A pull request is checked against it; the app checks the rest when it installs a pack (each blank a template describes is one its text has), so install yours from a file in the app first.
 
 ## Publishing
 
@@ -820,6 +826,6 @@ Packages in this repository are what the app lists from the community shelf.
 
 1. Add your file to `extensions/` (`.js`), `phrases/` (`.json`) or `templates/` (`.json`). To change a package, edit it and bump its `version`.
 2. Run `python3 scripts/build-extension-index.py` at the root of the repository. It refuses a package on the wrong shelf and writes each shelf's `index.json`.
-3. Commit the file with the shelf's `index.json` and open a pull request. The app installs a package only when its SHA-256 matches the index.
+3. Commit the file with the shelf's `index.json` and open a pull request. The check runs on it. Once it is merged, `publish` puts the shelves on the downloads host, signed, and the app installs a package only when its SHA-256 matches the index.
 
 `extensions/wordcount.js`, `phrases/cooking.json` and `templates/thank-you.json` are samples of each kind to copy.
