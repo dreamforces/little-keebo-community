@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
-"""Run at the root of the repository: writes extensions/index.json, phrases/index.json and templates/index.json.
+"""Run at the root of a library: writes extensions/index.json, phrases/index.json and templates/index.json.
 
 Little Keebo lists what each index lists and installs a package only if its SHA-256 matches, so run
 this after every change and commit the packages with their indexes.
+
+The same file is library/scripts/build-extension-index.py in dreamforces/little-keebo and scripts/build-extension-index.py in
+dreamforces/little-keebo-community; the library's check fails when the two differ.
 """
 import hashlib, json, pathlib
 
@@ -60,13 +63,15 @@ for path in sorted(templates.glob("*.json")):
         continue
     data = path.read_bytes()
     package = json.loads(data)
-    assert package.get("schemaVersion") == 1, f"{path}: templates/ holds template packs (schema 1)"
+    assert package.get("schemaVersion") == 2, f"{path}: templates/ holds template packs (schema 2)"
     assert package["id"] not in {e["id"] for e in entries}, f"{path}: duplicate id"
+    ids = [t.get("id") for t in package["templates"]]
+    assert all(ids) and len(set(ids)) == len(ids), f"{path}: every template has its own id"
     names = {}
     for name in package.get("categories", []) + [t["category"] for t in package["templates"] if t.get("category")]:
         names.setdefault(name.casefold(), name)
     entry = {key: package[key] for key in ("id", "name", "description", "author", "version")}
-    entry.update(path=path.as_posix(), sha256=hashlib.sha256(data).hexdigest(),
+    entry.update(path=path.as_posix(), sha256=hashlib.sha256(data).hexdigest(), schema=package["schemaVersion"],
                  capabilities=[c for c in [count(len(package["templates"]), "template"), count(len(names), "category")] if c])
     if package.get("tags"):
         entry["tags"] = package["tags"]

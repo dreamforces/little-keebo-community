@@ -1,8 +1,8 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "example.thank-you",
   "name": "Thank-you notes",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Little Keebo",
   "description": "Three short thank-you notes with blanks to fill in. A sample template pack to copy.",
   "tags": [
@@ -13,18 +13,21 @@
   ],
   "templates": [
     {
+      "id": "5703aacc-621f-5543-8a5e-ac74963ab34e",
       "trigger": "thanks-meeting",
       "title": "Thanks for the meeting",
       "text": "Hi ${1:name},\n\nThank you for your time today. ${2:I will send the notes by tomorrow.}\n\nBest,\n$0",
       "category": "Thanks"
     },
     {
+      "id": "5abc0d2d-7783-5e39-90d3-30b7781439d9",
       "trigger": "thanks-help",
       "title": "Thanks for the help",
       "text": "Hi ${1:name},\n\nThank you for helping with ${2:the project}. ${3|It made a real difference.,I really appreciate it.,I owe you one.|}\n\n$0",
       "category": "Thanks"
     },
     {
+      "id": "0b3aa610-c1c7-543c-b631-d9b689afc2ae",
       "trigger": "thanks-gift",
       "title": "Thanks for the gift",
       "text": "Dear ${1:name},\n\nThank you for the ${2:gift}. ${3:It was thoughtful of you.}\n\nWith thanks,\n$0",

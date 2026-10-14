@@ -6,9 +6,10 @@
       "name": "Thank-you notes",
       "description": "Three short thank-you notes with blanks to fill in. A sample template pack to copy.",
       "author": "Little Keebo",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "path": "templates/thank-you.json",
-      "sha256": "134634f056c1d52030df58acff9ced0f20d83bc597c31ea28ab2cad2476e3e18",
+      "sha256": "2a015ceba4f2d2fa8299f0687381df7f9f17982e9ae78bd03c033b3e2ece8c1d",
+      "schema": 2,
       "capabilities": [
         "3 templates",
         "1 category"
