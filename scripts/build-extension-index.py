@@ -75,6 +75,9 @@ for path in sorted(templates.glob("*.json")):
                  capabilities=[c for c in [count(len(package["templates"]), "template"), count(len(names), "category")] if c])
     if package.get("tags"):
         entry["tags"] = package["tags"]
+    # The phrasebook for the same field, which the app offers with the pack before it is downloaded.
+    if package.get("phrasebook"):
+        entry["phrasebook"] = package["phrasebook"]
     entries.append(entry)
 entries.sort(key=lambda entry: entry["id"])
 (templates / "index.json").write_text(json.dumps({"schemaVersion": 1, "packages": entries}, indent=2, ensure_ascii=False) + "\n")
