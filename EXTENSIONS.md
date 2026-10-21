@@ -2,7 +2,7 @@
 
 An extension is one JavaScript file. The script calls `keebo.define` once, and after that the only host it can reach is `keebo`. This page is the contract: the file, each thing a script can declare, and each `keebo` function, with an example.
 
-The app ships no extensions. Install a `.js` file from **Extensions → Install from File** after **Allow third-party extensions**. Until that switch is on, search and install stay off. **Details** shows what a package adds. **Options…** draws the settings the script declares.
+The app carries two of Little Keebo's own extensions, Prompt and Spelling & Grammar, on from the first launch with nothing to install. Install others from the library in **Add-ons → Extensions**, or a `.js` file with **Install from File…** there, after **Allow third-party extensions**. Until that switch is on, search and install stay off. Each extension has a page of its own in the app, opened from its row: what it adds, and its options, which the app draws from the settings the script declares.
 
 A phrasebook is a different file: JSON, no script. It is at the end of this page.
 
@@ -106,7 +106,7 @@ Returning `""` removes the slash command and types nothing. That is allowed when
 | `ctx.before` | `"twelve apples "` — the field before the slash command |
 | `ctx.after` | `""` — the field after the caret |
 | `ctx.text` | `ctx.before + ctx.after` |
-| `ctx.language` | A BCP-47 tag for the writing, such as `en` or `tr`. English until the text shows otherwise. |
+| `ctx.language` | A BCP-47 tag for the writing: the language the text is in, with the Mac’s region, such as `en-GB` on a Mac set to the UK, or `tr-GB` for Turkish there. English until the text shows otherwise. `Intl`, `toLocaleUpperCase` and `keebo.date` take it as it is. To check the language alone, compare `ctx.language.split("-")[0]`. |
 | `ctx.settings` | The extension’s settings, plus settings declared on this command. Keyed by id. |
 
 A command runs when the slash is at the start of the line or after a space. `and/or` and a URL are left alone. Typing `/` opens a menu at the caret: five rows, ↑↓ or the scroll wheel to move, keep typing to narrow, Esc to close. Tab halfway through a name completes it. Tab on a whole name runs a command whose `usage` does not start with `<`, and only closes the menu for one that still needs words (`usage` starts with `<`).
@@ -369,7 +369,7 @@ The note’s first word routes it. tell, ask, offer, suggest, thank, remind… i
 ```js
 settings: [
   { id: "max-words", title: "Max words", type: "number", value: 25 },
-  { id: "fix", title: "Fix typos", type: "toggle", value: false }
+  { id: "fix", title: "Fix typos", type: "toggle", value: true }
 ],
 actions: [
   { id: "shorten", title: "Shorten",
@@ -384,8 +384,8 @@ analyze(text, settings) {
   for (const hit of keebo.proofread(text)) {
     keebo.mark(hit, hit.message, {
       kind: hit.kind,
-      replacement: hit.guesses[0],
-      apply: settings.fix && hit.kind === "spelling" && !!hit.guesses[0]
+      replacement: hit.correction || hit.guesses[0],
+      apply: settings.fix && !!hit.correction
     })
   }
 }
@@ -501,7 +501,7 @@ keebo.define({
       run() {
         keebo.loading(true)
         try {
-          return keebo.fetch("https://api.frankfurter.app/latest?from=USD&to=GBP")
+          return keebo.fetch("https://api.frankfurter.dev/v1/latest?from=USD&to=GBP")
         } finally {
           keebo.loading(false)
         }
@@ -555,7 +555,7 @@ analyze(text) {
 
 ### `keebo.proofread(text)`
 
-The macOS spelling and grammar checker, in the language it detects, in one pass. Read only: nothing is added to the user dictionary. `kind` is `"spelling"` or `"grammar"`. `guesses` holds up to five suggestions. `message` is the checker’s description.
+The macOS spelling and grammar checker, in the language it detects, in one pass. Read only: nothing is added to the user dictionary. `kind` is `"spelling"` or `"grammar"`. `guesses` holds up to five suggestions. `message` is the checker’s description. For a misspelling, `correction` is the fix macOS is sure of: its own autocorrection for the word, when its first suggestion is the same word (`teh` is `the`); otherwise it is empty, as for `adress`, whose autocorrection is `dress` and first suggestion `address`. Fix with `correction`, and offer `guesses` for the writer to choose from.
 
 ```js
 analyze(text, settings) {
@@ -578,7 +578,7 @@ Underlines `span` in the paragraph `analyze` was given. A bad span is ignored. `
 | `replacement` | Suggested text, 1–120 characters, no control characters. |
 | `kind` | `spelling`, `grammar`, `punctuation`, `repetition`, `passiveVoice`, `cliche`, `inclusive`, or `custom`. The default is `custom`. Spelling and grammar use those colours. |
 | `action` | The id of an action this package declares. Accepting the underline runs that action. |
-| `apply` | `true` replaces the span in the scratchpad when `replacement` is set. Elsewhere the span is only underlined. |
+| `apply` | `true` replaces the span in the scratchpad when the writer pauses, when `replacement` is set; Backspace right after puts it back. Elsewhere the span is only underlined, except from an extension the app carries (Spelling & Grammar), whose fixes are also typed as the writer finishes the word in other apps. |
 
 ```js
 keebo.mark(sentence, "This sentence is long.", { action: "shorten", kind: "custom" })
@@ -629,7 +629,7 @@ run(ctx) {
 
 A date as `YYYY-MM-DD`, on this Mac’s calendar. It throws when it does not understand the text, or the day is not real.
 
-`options.language` reads an ambiguous number. `en` and `en-US` take the month first. Any other language takes the day first. A part over 12 settles the order. With no language, it reads as English.
+`options.language` says how to read a date in numbers, such as 03/04/2026: in the order macOS writes a short date in that language and region. A language without a region takes the Mac’s, as in `ctx.language`, so `en` on a Mac set to the UK is `en-GB`, which writes the day first, and 03/04/2026 is 3 April. On a Mac set to the US it is 4 March. A part over 12 settles the order. Where the short date starts with the year, as in Japanese, the day comes first. With no language, it reads as English.
 
 It understands today, tomorrow, yesterday, `+7` and `-3`; Tuesday, next Tue, and last Thursday; last Thursday of the last month and first Monday of October; 6 October 2026, October 6, 2026, 2026-10-06, 29/01/2026, and 01/29/2026. `next Tuesday` is the coming one, after today. A month named without a year is this year.
 
@@ -695,7 +695,7 @@ Leave it `true` when `run` returns an `ask`. The spinner stays up while the writ
 run() {
   keebo.loading(true)
   try {
-    return keebo.fetch("https://api.frankfurter.app/latest?from=USD&to=GBP")
+    return keebo.fetch("https://api.frankfurter.dev/v1/latest?from=USD&to=GBP")
   } finally {
     keebo.loading(false)
   }
@@ -754,7 +754,7 @@ One HTTPS GET. Returns the response body as text. Throws when the address is ref
 run() {
   keebo.loading(true)
   try {
-    const body = keebo.fetch("https://api.frankfurter.app/latest?from=USD&to=GBP")
+    const body = keebo.fetch("https://api.frankfurter.dev/v1/latest?from=USD&to=GBP")
     const data = JSON.parse(body)
     return String(data.rates.GBP)
   } finally {
@@ -762,6 +762,8 @@ run() {
   }
 }
 ```
+
+Little Keebo's Currency extension uses this for the European Central Bank rates published by [Frankfurter](https://frankfurter.dev/).
 
 ## Sandbox and limits
 

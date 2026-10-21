@@ -28,6 +28,8 @@ an index, then checks each download against the SHA-256 the index lists. Extensi
    - [`extensions/wordcount.js`](extensions/wordcount.js)
    - [`phrases/cooking.json`](phrases/cooking.json)
    - [`templates/thank-you.json`](templates/thank-you.json)
-2. Put your file on its shelf and run `python3 scripts/build-extension-index.py` at the root.
+2. Put your file on its shelf and run `python3 scripts/build-extension-index.py` at the root. For a template pack, also check
+   it against the schema the app reads, as the pull request's check does (it needs `pip install jsonschema`):
+   `curl -so /tmp/schema.json https://littlekeebo.app/schema/template-pack.schema.json && python3 scripts/check-templates.py /tmp/schema.json templates/<yours>.json`
 3. Commit the file with the shelf's `index.json` and open a pull request. A version is published once: to change a package
    once it is out, bump its `version`.
