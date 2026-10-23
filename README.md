@@ -17,10 +17,15 @@ scripts/                index builder, template pack check, and the publisher th
 EXTENSIONS.md           the guide: the file format and every function a script can call
 ```
 
-Merging to `main` publishes the library to `downloads.littlekeebo.app` (`.github/workflows/publish.yml`): each new package
+Only a person merges to `main`, and `publish` then waits for a person to approve the run before it publishes the library to `downloads.littlekeebo.app` (`.github/workflows/publish.yml`): each new package
 version goes up once under `extensions/community/<shelf>/<id>/<version>/`, and each shelf's index is signed with the
 community library's key and written to `feeds/community/<shelf>/index.json`. The app checks that signature before it trusts
 an index, then checks each download against the SHA-256 the index lists. Extensions run in a sandbox with no files or keys, and a script uses the network only after the writer allows that one.
+
+## Suggesting a package
+
+Every submission is reviewed by hand, and nothing is published until a person has approved it. A review can take days, and
+a pull request may be changed or closed. What is checked is in [REVIEWING.md](REVIEWING.md).
 
 ## Writing your own
 
@@ -31,5 +36,5 @@ an index, then checks each download against the SHA-256 the index lists. Extensi
 2. Put your file on its shelf and run `python3 scripts/build-extension-index.py` at the root. For a template pack, also check
    it against the schema the app reads, as the pull request's check does (it needs `pip install jsonschema`):
    `curl -so /tmp/schema.json https://littlekeebo.app/schema/template-pack.schema.json && python3 scripts/check-templates.py /tmp/schema.json templates/<yours>.json`
-3. Commit the file with the shelf's `index.json` and open a pull request. A version is published once: to change a package
+3. Commit the file with the shelf's `index.json` and open a pull request. It is reviewed by hand, which may take days. A version is published once: to change a package
    once it is out, bump its `version`.
