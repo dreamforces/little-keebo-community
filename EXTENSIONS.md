@@ -828,6 +828,6 @@ Packages in this repository are what the app lists from the community shelf.
 
 1. Add your file to `extensions/` (`.js`), `phrases/` (`.json`) or `templates/` (`.json`). To change a package, edit it and bump its `version`.
 2. Run `python3 scripts/build-extension-index.py` at the root of the repository. It refuses a package on the wrong shelf and writes each shelf's `index.json`.
-3. Commit the file with the shelf's `index.json` and open a pull request. The check runs on it. Once it is merged, `publish` puts the shelves on the downloads host, signed, and the app installs a package only when its SHA-256 matches the index.
+3. Commit the file with the shelf's `index.json` and open a pull request. The check runs on it, and a person reads it by hand, which may take days. Once it is merged and the run is approved, `publish` puts the shelves on the downloads host, signed, and the app installs a package only when its SHA-256 matches the index.
 
 `extensions/wordcount.js`, `phrases/cooking.json` and `templates/thank-you.json` are samples of each kind to copy.
